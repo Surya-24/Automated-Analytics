@@ -1,0 +1,18 @@
+# Secure, unprivileged Docker execution environment for ETL Python scripts
+FROM python:3.12-slim
+
+# Create non-root unprivileged sandbox user
+RUN useradd -m -u 1000 sandboxuser
+
+WORKDIR /workspace
+
+# Install data processing dependencies
+RUN pip install --no-cache-dir \
+    pandas==2.2.2 \
+    numpy==1.26.4 \
+    pyarrow==16.1.0
+
+# Set non-root user
+USER sandboxuser
+
+CMD ["python", "-c", "print('Sandbox Ready')"]

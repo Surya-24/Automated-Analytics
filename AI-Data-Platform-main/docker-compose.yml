@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Database Service
+  postgres_db:
+    image: postgres:16-alpine
+    container_name: data_agent_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${user:-postgres}
+      POSTGRES_PASSWORD: ${password:-postgres}
+      POSTGRES_DB: ${database:-postgres}
+    ports:
+      - "${port:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Main Streamlit AI Agent Application
+  data_agent_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: data_agent_dashboard
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - host=postgres_db
+      - port=5432
+      - user=${user:-postgres}
+      - password=${password:-postgres}
+      - database=${database:-postgres}
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2:-false}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
+      - LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT:-ai-data-agent}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY}
+      - LANGFUSE_HOST=${LANGFUSE_HOST:-https://cloud.langfuse.com}
+      - LOGFIRE_TOKEN=${LOGFIRE_TOKEN}
+    volumes:
+      - ./data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

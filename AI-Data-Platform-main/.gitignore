@@ -1,0 +1,31 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments & secrets
+.venv
+.env
+
+# Internal data files (prevents uploading any internal/raw data to GitHub)
+data/
+*.csv
+*.parquet
+test_schema_details.txt
+
+# Internal docs & personal notes
+resume.md
+implementation_plan.md
+walkthrough.md
+*.jpg
+*.png
+*.log
+
+# IDE & system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
